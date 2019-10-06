@@ -37,7 +37,7 @@ class ImportJournalEntryView(ContextMixin, FormView):
 
         return render
 
-class MigrationsTest(TestCase):
+class MigrationTest(TestCase):
 
     def setUpClass(cls):
         super().setUpClass()
@@ -152,5 +152,250 @@ class MigrationsTest(TestCase):
                 'code':1,
                 'type':'credit',
                 'balance':123}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class BillTests(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.bill = BillTest.objects.create(description='description')
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.ocbjects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_bill_create_view(self):
+        resp = self.client.get('/accounting/bill-create')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_get_bill_update_view(self):
+        resp = self.client.get('/accounting/bill-update/1')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_get_bill_list_view(self):
+        resp = self.client.get('/accounting/bill-list')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_get_bill_detail_view(self):
+        resp = self.client.get('/accounting/bill-detail/1')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_bill_create_view(self):
+        resp = self.client.post('/accounting/bill-create', data={'data':urllib.parse.quote(json.dumps([{
+                'description':'description',
+                'ammount':1}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+    def test_post_bill_update_view(self):
+        resp = self.client.post('/accounting/bill-update/1', data={'data':urllib.parse.quote(json.dumps([{
+                'description':'description',
+                'ammount':1}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class BillModelTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+    def setUpTestData(cls):
+        cls.email = Email.objects.create(address='tkandoro63@gmail.com')
+        cls.bill = Bill.objects.create('amount'=1)
+
+    def test_create_test_bill(self):
+        obj = Bill.objects.create(
+                 reference='reference'
+            )
+            self.assertIsInstance(obj, Bill)
+
+class BillPaymentViewTests(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.bill_payment = BillPaymentTest.objects.create(memo='memo')
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.ocbjects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_bill_payment_create_view(self):
+        resp = self.client.get('/accounting/bill-payment-create')
+        self.assertEqual(resp.status_code, 200)
+
+class BulkAccountTests(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.bulkacc = BulkAccountTest.objects.create(data='data')
+        cls.user = User.objects.create_user(username='test', password='123')\
+        cls.email = Email.objects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_bulk_account_create_view(self):
+        resp = self.client.get('/accounting/bulk-account-create')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_bulk_account_create_view(self):
+        resp = self.client.post('/accounting/bulk-account-create', data={'data':urllib.parse.quote(json.dumps([{
+                'name':'name',
+                'description':'description',
+                'code':1,
+                'type':'credit',
+                'balance':123,
+                'balance_sheet_category':'balance'}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class CreateMultipleEntriesView(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.multipleentries = CreateMultipleEntries.objects.create(date='date')
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.objects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_create_multiple_entries_view(self):
+        resp = self.client.get('/accounting/create-multiple-entries')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_create_multiple_entries_view(self):
+        resp = self.client.post('/accounting/create-multiple-entries', data={'data':urllib.parse.quote(json.dumps([{
+                'date':01/01/2001,
+                'memo':'memo',
+                'credit':1,
+                'account':0,
+                'debit':1}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class CreateMultipleExpensesView(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.multipleexpenses = CreateMultipleExpenses.objects.create(date=01/01/2001)
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.objects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_create_multiple_expenses_view(self):
+        resp = self.client.get('/accounting/create-multiple-expenses')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_create_multiple_expenses_view(self):
+        resp = self.client.post('/accounting/create-multiple-expenses', data={'data':urllib.parse.quote(json.dumps([{
+                'data':'data',
+                'date':01/01/2001,
+                'description':'description',
+                'amount':123,
+                'category':'category'}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class ImportExpensesView(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.importexpenses = ImportExpenses.objects.create(date=01/01/2001)
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.objects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_import_expenses_view(self):
+        resp = self.client.get('/accounting/import-expenses-')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_import_expenses_view(self):
+        resp = self.client.post('/accounting/import-expenses', data={'data':urllib.parse.quote(json.dumps([{
+                'date':01/01/2001,
+                'description':'description',
+                'amount':123,
+                'category':'category'}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class CreateMultipleCustomersView(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.multiplecustomers = CreateMultipleCustomers.objects.create(date=01/01/2001)
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.objects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_create_multiple_customers_view(self):
+        resp = self.client.get('/invoicing/create-multiple-customers')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_create_multiple_customers_view(self):
+        resp = self.client.post('/invoicing/create-multiple-customers', data={'data':urllib.parse.quote(json.dumps([{
+                'name':'name',
+                'business_address':'address',
+                'email':self.email.pk,
+                'phone':123456}]))
+                })
+        self.assertEqual(resp.status_code, 302)
+
+class ImportCustomersView(TestCase):
+
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.client = Client()
+
+    def setUpTestData(cls):
+        cls.importcustomers = ImportCustomers.objects.create(name='name')
+        cls.user = User.objects.create_user(username='test',password='123')
+        cls.email = Email.objects.create(address='address')
+
+    def setUp(self):
+        self.client.login(username='test',password='123')
+
+    def test_get_import_customers_view(self):
+        resp = self.client.get('/invoicing/import-customers')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_post_import_expenses_view(self):
+        resp = self.client.post('/invoicing/import-customers', data={'data':urllib.parse.quote(json.dumps([{
+                'name':1,
+                'phone':123456,
+                'address':2,
+                'type':3,
+                'email':self.email.pk,
+                'account_balance':987654}]))
                 })
         self.assertEqual(resp.status_code, 302)
